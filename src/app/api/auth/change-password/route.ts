@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         const users = userQuery.rows[0];
 
         // Validate old password
-        const isOldPasswordValid = await compare(requestBody.oldPassword, users.password);
+        const isOldPasswordValid = await compare(requestBody.oldPassword, users.password.trim());
         if (!isOldPasswordValid) {
             return new Response(JSON.stringify({ error: 'Old password is incorrect' }), {
                 status: 401,

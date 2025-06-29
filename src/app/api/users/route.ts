@@ -115,7 +115,7 @@ export async function PUT(request: NextRequest) {
             [id]
         );
 
-        if (existingCustomer.rows.length === 0) {
+        if (existingCustomer.rows.length == 0) {
             return NextResponse.json(
                 { success: false, message: "Employee not found" },
                 { status: 404 }
@@ -131,7 +131,7 @@ export async function PUT(request: NextRequest) {
             [name, email, contact, status, id]
         );
 
-        if (result.rowCount === 1) {
+        if (result.rowCount == 1) {
             return NextResponse.json(
                 { success: true, message: 'Employee updated successfully' },
                 { status: 200 }

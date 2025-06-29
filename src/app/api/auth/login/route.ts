@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
         const db = await connectionToDatabase();
 
-        // Check if the users exists in the database
+        // Check if the user exists in the database
         const userQuery = await db.query(
             'SELECT * FROM "users" WHERE TRIM(email) = $1',
             [requestBody.email]
@@ -36,10 +36,10 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        const users = userQuery.rows[0];
+        const user = userQuery.rows[0];
 
         // Validate the password
-        const isPasswordValid = await compare(requestBody.password, users.password.trim());
+        const isPasswordValid = await compare(requestBody.password, user.password.trim());
         if (!isPasswordValid) {
             return new Response(JSON.stringify({ error: 'Invalid email or password' }), {
                 status: 401,
@@ -47,32 +47,40 @@ export async function POST(request: NextRequest) {
             });
         }
 
+        // Check if user has vendor role
+        if (user.role.trim() !== 'vendor') {
+            return new Response(JSON.stringify({ error: 'Access denied.' }), {
+                status: 403,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+
         // Generate JWT token
         const token = jwt.sign(
             {
-                id: users.id,
-                name: users.name,
-                email: users.email,
-                contact: users.contact,
-                role: users.role,
-                image: users.image
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                contact: user.contact,
+                role: user.role,
+                image: user.image
             },
             SECRET_KEY,
             { expiresIn: '1h' }
         );
 
-        // Send back the token and users data
+        // Send back the token and user data
         const userData = {
-            id: users.id,
-            name: users.name,
-            email: users.email,
-            contact: users.contact,
-            role: users.role,
-            image: users.image
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            contact: user.contact,
+            role: user.role,
+            image: user.image
         };
 
         return new Response(
-            JSON.stringify({ token, users: userData }),
+            JSON.stringify({ token, user: userData }),
             {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' },
@@ -82,7 +90,7 @@ export async function POST(request: NextRequest) {
         console.error('Authentication error:', error);
         // Return error if authentication fails
         return new Response(
-            JSON.stringify({ error: 'Failed to authenticate users' }),
+            JSON.stringify({ error: 'Failed to authenticate user' }),
             {
                 status: 500,
                 headers: { 'Content-Type': 'application/json' },

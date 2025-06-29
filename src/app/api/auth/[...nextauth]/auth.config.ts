@@ -39,6 +39,10 @@ export const authOptions: AuthOptions = {
                     const isPasswordValid = await compare(credentials.password, user.password);
                     if (!isPasswordValid) throw new Error("Invalid email or password.");
 
+                    if (user.role.trim() !== "merchant") {
+                        throw new Error("Access-denied.");
+                    }
+
                     return {
                         id: user.id,
                         name: `${user.name} ${user.last_name}`,
@@ -72,39 +76,26 @@ export const authOptions: AuthOptions = {
                     );
 
                     if (existingUsers.length == 0) {
-                        const newUser = await runQuery(
-                            `INSERT INTO users (name, email, role, image) 
-                             VALUES ($1, $2, $3, $4) 
-                             RETURNING *`,
-                            [user.name, user.email, "admin", user.image || null]
-                        );
-
-                        if (newUser.length > 0) {
-                            const createdUser = newUser[0];
-                            user.id = createdUser.id;
-                            user.name = createdUser.name;
-                            user.last_name = createdUser.last_name;
-                            user.email = createdUser.email;
-                            user.contact = createdUser.contact;
-                            user.company = createdUser.company;
-                            user.logo = createdUser.logo;
-                            user.address = createdUser.address;
-                            user.role = createdUser.role;
-                            user.image = createdUser.image;
-                        }
-                    } else {
-                        const existingUser = existingUsers[0];
-                        user.id = existingUser.id;
-                        user.name = existingUser.name;
-                        user.last_name = existingUser.last_name;
-                        user.email = existingUser.email;
-                        user.contact = existingUser.contact;
-                        user.company = existingUser.company;
-                        user.logo = existingUser.logo;
-                        user.address = existingUser.address;
-                        user.role = existingUser.role;
-                        user.image = existingUser.image;
+                        throw new Error("No account found with this email.");
                     }
+
+                    const existingUser = existingUsers[0];
+
+                    // Check if user is merchant
+                    if (existingUser.role.trim() !== "merchant") {
+                        throw new Error("Access denied.");
+                    }
+
+                    user.id = existingUser.id;
+                    user.name = existingUser.name;
+                    user.last_name = existingUser.last_name;
+                    user.email = existingUser.email;
+                    user.contact = existingUser.contact;
+                    user.company = existingUser.company;
+                    user.logo = existingUser.logo;
+                    user.address = existingUser.address;
+                    user.role = existingUser.role;
+                    user.image = existingUser.image;
 
                     return true;
                 } catch (error) {

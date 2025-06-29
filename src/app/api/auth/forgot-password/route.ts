@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     // Set up the email transporter using nodemailer
     const transporter = nodemailer.createTransport({
-      host: 'premium900.web-hosting.com',
+      host: 'premium279.web-hosting.com',
       port: 465,
       secure: true,
       auth: {

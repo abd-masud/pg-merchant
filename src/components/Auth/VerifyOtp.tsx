@@ -3,7 +3,6 @@
 import Image from "next/image";
 import logo from "../../../public/images/logo.webp";
 import Link from "next/link";
-import { FaAngleLeft } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaXmark } from "react-icons/fa6";
@@ -205,14 +204,12 @@ export const VerifyOtpComponent = () => {
                 </span>
               </button>
             </p>
-            <p className="text-[14px] text-[#363636] font-[500] mt-4">
-              <Link
-                className="text-[#307EF3] text-[14px] tracking-wide flex items-center"
-                href={"/auth/login"}
-              >
-                <FaAngleLeft className="h-3 mr-1 mt-[2px]" />
-                Back
+            <p className="text-[14px] tracking-wide flex items-center mt-4">
+              Go back to the
+              <Link className="text-[#307EF3] mx-1" href={"/auth/login"}>
+                Login
               </Link>
+              page.
             </p>
           </form>
         </div>

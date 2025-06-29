@@ -23,6 +23,7 @@ export const LoginComponent = () => {
   const handleSignIn = async () => {
     if (googleLoading) return;
     setGoogleLoading(true);
+    setError(null);
     try {
       const result = await signIn("google", {
         redirect: false,
@@ -53,7 +54,7 @@ export const LoginComponent = () => {
     setSignLoading(true);
     setError(null);
     const payload = {
-      email,
+      email: email.trim(),
       password,
     };
 
@@ -66,17 +67,39 @@ export const LoginComponent = () => {
         body: JSON.stringify(payload),
       });
 
+      const responseData = await response.json();
+
       if (response.ok) {
-        const { token, user: userData } = await response.json();
+        const { token, user: userData } = responseData;
+
+        // Check if user is merchant (with extra validation)
+        if (
+          !userData?.role ||
+          userData.role.trim().toLowerCase() !== "merchant"
+        ) {
+          setError("Access denied.");
+          return;
+        }
+
         setUser(userData);
         localStorage.setItem("pg_user", token);
         window.location.href = "/dashboard";
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        setError(errorData.message || "Invalid email or password");
+        // Handle API error responses
+        const errorMessage =
+          responseData.error ||
+          responseData.message ||
+          "Invalid email or password";
+        setError(errorMessage);
+
+        // Special case for 403 Forbidden (merchant role rejection)
+        if (response.status == 403) {
+          setError("Access denied.");
+        }
       }
-    } catch {
-      setError("Network error. Please check your connection.");
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("An error occurred during login. Please try again.");
     } finally {
       setTimeout(() => setError(null), 5000);
       setSignLoading(false);
@@ -120,7 +143,7 @@ export const LoginComponent = () => {
         </h2>
 
         <button
-          className="flex items-center justify-center w-full py-2 text-[14px] font-[500] border bg-gray-100 hover:bg-gray-200 text-black rounded transition-all duration-300"
+          className="flex items-center justify-center w-full py-2 text-[14px] font-[500] border bg-gray-100 hover:bg-gray-200 text-black rounded transition-all duration-300 mb-4"
           onClick={handleSignIn}
           disabled={googleLoading}
         >
@@ -189,12 +212,6 @@ export const LoginComponent = () => {
           >
             {!signLoading ? "Sign in" : "Signing in..."}
           </button>
-          <p className="text-[14px] text-[#9B9B9B] tracking-wide mt-4">
-            Don&apos;t have account?{" "}
-            <Link className="text-[#307EF3]" href={"/auth/sign-up"}>
-              Create account
-            </Link>
-          </p>
         </form>
       </div>
     </main>

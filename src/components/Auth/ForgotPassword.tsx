@@ -3,7 +3,6 @@
 import Image from "next/image";
 import logo from "../../../public/images/logo.webp";
 import Link from "next/link";
-import { FaAngleLeft } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaXmark } from "react-icons/fa6";
@@ -99,13 +98,13 @@ export const ForgotPasswordComponent = () => {
           >
             {loading ? "Sending..." : "Send Verification Code"}
           </button>
-          <Link
-            className="text-[#307EF3] text-[14px] tracking-wide flex items-center"
-            href={"/auth/login"}
-          >
-            <FaAngleLeft className="h-3 mr-1 mt-[2px]" />
-            Back
-          </Link>
+          <p className="text-[14px] tracking-wide flex items-center">
+            Go back to the
+            <Link className="text-[#307EF3] mx-1" href={"/auth/login"}>
+              Login
+            </Link>
+            page.
+          </p>
         </form>
       </div>
     </main>
